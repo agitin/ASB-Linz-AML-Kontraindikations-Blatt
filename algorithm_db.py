@@ -17,8 +17,17 @@ class PropertyWithComment:
 
 
 @dataclass
+class SymptomProperty:
+    """Ein Symptom mit voller, hervorgehobener und verkürzter Version sowie Kommentar"""
+    full_text: str
+    highlighted: str = ""
+    shortened: str = ""
+    comment: str = ""
+
+
+@dataclass
 class Specialty:
-    """Handelsnamen/Spezialität eines Wirkstoffs"""
+    """Handelsnamen/Handelsname eines Wirkstoffs"""
     name: str
     comment: str = ""
 
@@ -48,8 +57,8 @@ class ActiveSubstance:
 @dataclass
 class PatientGroup:
     """Patient-Gruppe (Kinder oder Erwachsene) mit allen Informationen"""
-    physician_contact: str = ""
-    physician_contact_comment: str = ""
+    notarzt: str = ""
+    notarzt_comment: str = ""
     contraindications: List[PropertyWithComment] = field(default_factory=list)
     active_substances: List[ActiveSubstance] = field(default_factory=list)
 
@@ -59,8 +68,7 @@ class Algorithm:
     """Ein Algorithmus für ein bestimmtes Medikament/Indikation"""
     title: str
     comment: str = ""
-    symptoms: List[PropertyWithComment] = field(default_factory=list)
-    symptoms_highlighted: List[PropertyWithComment] = field(default_factory=list)
+    symptoms: List[SymptomProperty] = field(default_factory=list)
     apply_children: bool = False
     apply_adults: bool = False
     children: Optional[PatientGroup] = None
@@ -77,42 +85,54 @@ class Algorithm:
         if 'symptoms' in data and data['symptoms']:
             for symptom in data['symptoms']:
                 if isinstance(symptom, dict):
-                    symptoms.append(PropertyWithComment(
-                        text=symptom.get('text', ''),
+                    # Versuche neue Keys, fallback auf alte Keys
+                    full_text = symptom.get('full_text') or symptom.get('symptom') or symptom.get('text', '')
+                    highlighted = symptom.get('highlighted') or symptom.get('symptom_highlighted', '')
+                    shortened = symptom.get('shortened') or symptom.get('symptom_shortened', '')
+                    symptoms.append(SymptomProperty(
+                        full_text=full_text,
+                        highlighted=highlighted,
+                        shortened=shortened,
                         comment=symptom.get('comment', '')
                     ))
                 else:
-                    symptoms.append(PropertyWithComment(text=symptom, comment=''))
+                    symptoms.append(SymptomProperty(full_text=symptom, comment=''))
         
-        # Parse symptoms_highlighted
-        symptoms_highlighted = []
+        # Parse symptoms_highlighted (für Rückwärtskompatibilität)
         if 'symptoms_highlighted' in data and data['symptoms_highlighted']:
             for symptom in data['symptoms_highlighted']:
                 if isinstance(symptom, dict):
-                    symptoms_highlighted.append(PropertyWithComment(
-                        text=symptom.get('text', ''),
+                    full_text = symptom.get('symptom_highlighted') or symptom.get('text', '')
+                    shortened = symptom.get('symptom_highlighted_shortened', '')
+                    symptoms.append(SymptomProperty(
+                        full_text=full_text,
+                        highlighted=full_text,
+                        shortened=shortened,
                         comment=symptom.get('comment', '')
                     ))
                 else:
-                    symptoms_highlighted.append(PropertyWithComment(text=symptom, comment=''))
+                    symptoms.append(SymptomProperty(full_text=symptom, highlighted=symptom, comment=''))
         
         # Parse children
         children = None
-        if 'children' in data and data['children']:
+        if 'kinder' in data and data['kinder']:
+            children = cls._parse_patient_group(data['kinder'])
+        elif 'children' in data and data['children']:
             children = cls._parse_patient_group(data['children'])
         
         # Parse adults
         adults = None
-        if 'adults' in data and data['adults']:
+        if 'erwachsene' in data and data['erwachsene']:
+            adults = cls._parse_patient_group(data['erwachsene'])
+        elif 'adults' in data and data['adults']:
             adults = cls._parse_patient_group(data['adults'])
         
         return cls(
             title=data.get('title', ''),
             comment=data.get('comment', ''),
             symptoms=symptoms,
-            symptoms_highlighted=symptoms_highlighted,
-            apply_children=data.get('apply_children', False),
-            apply_adults=data.get('apply_adults', False),
+            apply_children=data.get('kinderanwendung', data.get('apply_children', False)),
+            apply_adults=data.get('erwachsenenanwendung', data.get('apply_adults', False)),
             children=children,
             adults=adults
         )
@@ -122,64 +142,87 @@ class Algorithm:
         """Parser für eine PatientGroup aus YAML"""
         # Parse contraindications
         contraindications = []
-        if 'contraindications' in group_data and group_data['contraindications']:
-            for ci in group_data['contraindications']:
-                if isinstance(ci, dict):
-                    contraindications.append(PropertyWithComment(
-                        text=ci.get('text', ''),
-                        comment=ci.get('comment', '')
-                    ))
-                else:
-                    contraindications.append(PropertyWithComment(text=ci, comment=''))
-        
-        # Parse active substances
-        active_substances = []
-        if 'active_substances' in group_data and group_data['active_substances']:
-            for substance_data in group_data['active_substances']:
-                # Parse specialties
-                specialties = []
-                for spec in substance_data.get('specialties', []):
-                    if isinstance(spec, dict):
-                        specialties.append(Specialty(
-                            name=spec.get('name', ''),
-                            comment=spec.get('comment', '')
-                        ))
-                    else:
-                        specialties.append(Specialty(name=spec, comment=''))
-                
-                # Parse substance contraindications
-                subst_contraindications = []
-                for ci in substance_data.get('contraindications', []):
+        for ci_key in ['kontraindikationen', 'contraindications']:
+            if ci_key in group_data and group_data[ci_key]:
+                for ci in group_data[ci_key]:
                     if isinstance(ci, dict):
-                        subst_contraindications.append(PropertyWithComment(
-                            text=ci.get('text', ''),
+                        # Versuche deutsch oder english
+                        text = ci.get('kontraindikation') or ci.get('contraindication') or ci.get('text', '')
+                        contraindications.append(PropertyWithComment(
+                            text=text,
                             comment=ci.get('comment', '')
                         ))
                     else:
-                        subst_contraindications.append(PropertyWithComment(text=ci, comment=''))
+                        contraindications.append(PropertyWithComment(text=ci, comment=''))
+                break
+        
+        # Parse active substances
+        active_substances = []
+        for substance_key in ['wirkstoffe', 'active_substances']:
+            if substance_key in group_data and group_data[substance_key]:
+                for substance_data in group_data[substance_key]:
+                # Parse handelsnamen
+                handelsnamen = []
+                for spec_list in [substance_data.get('handelsnamen', []), substance_data.get('specialties', [])]:
+                    for spec in spec_list:
+                        if isinstance(spec, dict):
+                            # Versuche 'handelsname' oder 'specialty' oder fallback 'name'
+                            name = spec.get('handelsname') or spec.get('specialty') or spec.get('name', '')
+                            handelsnamen.append(Specialty(
+                                name=name,
+                                comment=spec.get('comment', '')
+                            ))
+                        else:
+                            handelsnamen.append(Specialty(name=spec, comment=''))
+                    if spec_list:
+                        break
+                
+                # Parse substance contraindications
+                subst_contraindications = []
+                for ci_list in [substance_data.get('kontraindikationen', []), substance_data.get('contraindications', [])]:
+                    for ci in ci_list:
+                        if isinstance(ci, dict):
+                            # Versuche 'kontraindikation' oder 'contraindication' oder fallback 'text'
+                            text = ci.get('kontraindikation') or ci.get('contraindication') or ci.get('text', '')
+                            subst_contraindications.append(PropertyWithComment(
+                                text=text,
+                                comment=ci.get('comment', '')
+                            ))
+                        else:
+                            subst_contraindications.append(PropertyWithComment(text=ci, comment=''))
+                    if ci_list:
+                        break
                 
                 # Parse dosage groups
                 dosage_groups = []
-                for dg in substance_data.get('dosage_groups', []):
-                    dosage_groups.append(DosageGroup(
-                        weight_class=dg.get('weight_class', ''),
-                        weight_class_comment=dg.get('weight_class_comment', ''),
-                        dosage=dg.get('dosage', ''),
-                        dosage_comment=dg.get('dosage_comment', ''),
-                        route=dg.get('route', ''),
-                        route_comment=dg.get('route_comment', '')
-                    ))
+                for dg_list in [substance_data.get('dosierungsgruppen', []), substance_data.get('dosage_groups', [])]:
+                    for dg in dg_list:
+                        dosage_groups.append(DosageGroup(
+                            weight_class=dg.get('gewichtsklasse') or dg.get('weight_class', ''),
+                            weight_class_comment=dg.get('gewichtsklasse_comment') or dg.get('weight_class_comment', ''),
+                            dosage=dg.get('dosierung') or dg.get('dosage', ''),
+                            dosage_comment=dg.get('dosierung_comment') or dg.get('dosage_comment', ''),
+                            route=dg.get('applikation') or dg.get('route', ''),
+                            route_comment=dg.get('applikation_comment') or dg.get('route_comment', '')
+                        ))
+                    if dg_list:
+                        break
                 
                 # Parse repetitions
                 repetitions = []
-                for rep in substance_data.get('repetitions', []):
-                    if isinstance(rep, dict):
-                        repetitions.append(PropertyWithComment(
-                            text=rep.get('text', ''),
-                            comment=rep.get('comment', '')
-                        ))
-                    else:
-                        repetitions.append(PropertyWithComment(text=rep, comment=''))
+                for rep_list in [substance_data.get('wiederholungen', []), substance_data.get('repetitions', [])]:
+                    for rep in rep_list:
+                        if isinstance(rep, dict):
+                            # Versuche 'wiederholung' oder 'repetition' oder fallback 'text'
+                            text = rep.get('wiederholung') or rep.get('repetition') or rep.get('text', '')
+                            repetitions.append(PropertyWithComment(
+                                text=text,
+                                comment=rep.get('comment', '')
+                            ))
+                        else:
+                            repetitions.append(PropertyWithComment(text=rep, comment=''))
+                    if rep_list:
+                        break
                 
                 active_substances.append(ActiveSubstance(
                     name=substance_data.get('name', ''),
@@ -191,8 +234,8 @@ class Algorithm:
                 ))
         
         return PatientGroup(
-            physician_contact=group_data.get('physician_contact', ''),
-            physician_contact_comment=group_data.get('physician_contact_comment', ''),
+            notarzt=group_data.get('notarzt', '') or group_data.get('physician_contact', ''),
+            notarzt_comment=group_data.get('notarzt_comment', '') or group_data.get('physician_contact_comment', ''),
             contraindications=contraindications,
             active_substances=active_substances
         )
@@ -210,15 +253,11 @@ class Algorithm:
         if self.symptoms:
             lines.append("## Symptome")
             for symptom in self.symptoms:
-                lines.append(self._format_property(symptom.text, symptom.comment))
-            lines.append("")
-        
-        # Highlighted Symptoms
-        if self.symptoms_highlighted and any(s.text for s in self.symptoms_highlighted):
-            lines.append("## Symptome (hervorgehoben)")
-            for symptom in self.symptoms_highlighted:
-                if symptom.text:
-                    lines.append(self._format_property(symptom.text, symptom.comment))
+                lines.append(self._format_property(symptom.full_text, symptom.comment))
+                if symptom.highlighted:
+                    lines.append(self._format_property(f"  → Hervorgehoben: {symptom.highlighted}", ""))
+                if symptom.shortened:
+                    lines.append(self._format_property(f"  → Kurzform: {symptom.shortened}", ""))
             lines.append("")
         
         # Kinder
@@ -244,11 +283,11 @@ class Algorithm:
         """Konvertiert eine PatientGroup zu Markdown-Zeilen"""
         lines = []
         
-        # Physician contact
-        if group.physician_contact:
+        # Notarzt contact
+        if group.notarzt:
             lines.append(self._format_property(
-                f"Notarzt: {group.physician_contact}",
-                group.physician_contact_comment
+                f"Notarzt: {group.notarzt}",
+                group.notarzt_comment
             ))
         
         # Contraindications

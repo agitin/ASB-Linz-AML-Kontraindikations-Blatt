@@ -1,73 +1,69 @@
-title: Anaphylaxie / Anaphylaktische Reaktion
+title: Schwere anaphylaktische Reaktion
 comment: ""
 
 symptoms:
-  - text: "Ereignisbezogener Zusammenhang"
-    comment: "Insektenstich, Medikamente, Nahrungsmittel, etc."
-  - text: "Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome"
+  - full_text: "Ereignisbezogener Zusammenhang (Insektenstich, Medikamente, Nahrungsmittel, etc.) Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome eventuell Hautsymptome"
+    highlighted: "Ereignisbezogener Zusammenhang, Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome"
+    shortened: ""
     comment: ""
 
-symptoms_highlighted:
-  - text: ""
-    comment: ""
+kinderanwendung: true
+erwachsenenanwendung: true
 
-apply_children: true
-apply_adults: true
-
-children:
-  physician_contact: "alarmieren"
-  physician_contact_comment: ""
+kinder:
+  notarzt: "alarmieren"
+  notarzt_comment: ""
   
-  contraindications:
-    - text: "unter 15 kg KG / 3. LJ"
+  kontraindikationen:
+    - kontraindikation: "unter 15 kg KG / 3. LJ"
       comment: ""
   
-  active_substances:
+  wirkstoffe:
     - name: "Epinephrin"
       comment: ""
-      specialties:
-        - name: "Autoinjektor"
+      handelsnamen:
+        - handelsname: "Autoinjektor"
           comment: ""
-      contraindications:
-        - text: ""
+      kontraindikationen:
+        - kontraindikation: ""
           comment: ""
-      dosage_groups:
-        - weight_class: "15-30 kg KG / 3.-12. LJ"
-          weight_class_comment: ""
-          dosage: "150 µg"
-          dosage_comment: ""
-          route: "i.m."
-          route_comment: ""
-        - weight_class: "über 30 kg KG / über 12. LJ"
-          weight_class_comment: ""
-          dosage: "300 µg"
-          dosage_comment: ""
-          route: "i.m."
-          route_comment: ""
-      repetitions:
-        - text: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
+      dosierungsgruppen:
+        - gewichtsklasse: "15-30 kg KG / 3.-12. LJ"
+          gewichtsklasse_comment: ""
+          dosierung: "150 µg"
+          dosierung_comment: ""
+          applikation: "i.m."
+          applikation_comment: ""
+        - gewichtsklasse: "über 30 kg KG / über 12. LJ"
+          gewichtsklasse_comment: ""
+          dosierung: "300 µg"
+          dosierung_comment: ""
+          applikation: "i.m."
+          applikation_comment: ""
+      wiederholungen:
+        - wiederholung: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
           comment: ""
 
-adults:
-  physician_contact: "alarmieren"
-  physician_contact_comment: ""
+erwachsene:
+  notarzt: "alarmieren"
+  notarzt_comment: ""
   
-  contraindications: []
+  kontraindikationen: []
   
-  active_substances:
+  wirkstoffe:
     - name: "Epinephrin"
       comment: ""
-      specialties:
-        - name: "Autoinjektor"
+      handelsnamen:
+        - handelsname: "Autoinjektor"
           comment: ""
-      contraindications: []
-      dosage_groups:
-        - weight_class: "keine"
-          weight_class_comment: ""
-          dosage: "300 µg"
-          dosage_comment: ""
-          route: "i.m."
-          route_comment: ""
-      repetitions:
-        - text: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
+      kontraindikationen: []
+      dosierungsgruppen:
+        - gewichtsklasse: "keine"
+          gewichtsklasse_comment: ""
+          dosierung: "300 µg"
+          dosierung_comment: ""
+          applikation: "i.m."
+          applikation_comment: ""
+      wiederholungen:
+        - wiederholung: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
           comment: ""

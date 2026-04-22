@@ -1,8 +1,8 @@
-# Anaphylaxie / Anaphylaktische Reaktion
+# Schwere anaphylaktische Reaktion
 
 ## Symptome
-- Ereignisbezogener Zusammenhang                               _Insektenstich, Medikamente, Nahrungsmittel, etc._
-- Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome
+- Ereignisbezogener Zusammenhang (Insektenstich, Medikamente, Nahrungsmittel, etc.) Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome eventuell Hautsymptome
+-   → Hervorgehoben: Ereignisbezogener Zusammenhang, Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome
 
 ## Kinderanwendung
 - Notarzt: alarmieren
