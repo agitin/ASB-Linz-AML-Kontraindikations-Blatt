@@ -1,0 +1,73 @@
+title: Anaphylaxie / Anaphylaktische Reaktion
+comment: ""
+
+symptoms:
+  - text: "Ereignisbezogener Zusammenhang"
+    comment: "Insektenstich, Medikamente, Nahrungsmittel, etc."
+  - text: "Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome"
+    comment: ""
+
+symptoms_highlighted:
+  - text: ""
+    comment: ""
+
+apply_children: true
+apply_adults: true
+
+children:
+  physician_contact: "alarmieren"
+  physician_contact_comment: ""
+  
+  contraindications:
+    - text: "unter 15 kg KG / 3. LJ"
+      comment: ""
+  
+  active_substances:
+    - name: "Epinephrin"
+      comment: ""
+      specialties:
+        - name: "Autoinjektor"
+          comment: ""
+      contraindications:
+        - text: ""
+          comment: ""
+      dosage_groups:
+        - weight_class: "15-30 kg KG / 3.-12. LJ"
+          weight_class_comment: ""
+          dosage: "150 µg"
+          dosage_comment: ""
+          route: "i.m."
+          route_comment: ""
+        - weight_class: "über 30 kg KG / über 12. LJ"
+          weight_class_comment: ""
+          dosage: "300 µg"
+          dosage_comment: ""
+          route: "i.m."
+          route_comment: ""
+      repetitions:
+        - text: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
+          comment: ""
+
+adults:
+  physician_contact: "alarmieren"
+  physician_contact_comment: ""
+  
+  contraindications: []
+  
+  active_substances:
+    - name: "Epinephrin"
+      comment: ""
+      specialties:
+        - name: "Autoinjektor"
+          comment: ""
+      contraindications: []
+      dosage_groups:
+        - weight_class: "keine"
+          weight_class_comment: ""
+          dosage: "300 µg"
+          dosage_comment: ""
+          route: "i.m."
+          route_comment: ""
+      repetitions:
+        - text: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
+          comment: ""
