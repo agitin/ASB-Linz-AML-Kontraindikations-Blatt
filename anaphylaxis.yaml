@@ -1,11 +1,11 @@
-title: Schwere anaphylaktische Reaktion
+algorithmus: "Schwere anaphylaktische Reaktion TEST"
 comment: ""
 
 symptoms:
-  - full_text: "Ereignisbezogener Zusammenhang (Insektenstich, Medikamente, Nahrungsmittel, etc.) Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome eventuell Hautsymptome"
-    highlighted: "Ereignisbezogener Zusammenhang, Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome"
-    shortened: ""
-    comment: ""
+  - ganzer_text: "Ereignisbezogener Zusammenhang (Insektenstich, Medikamente, Nahrungsmittel, etc.) Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome eventuell Hautsymptome"
+    hervorgehoben: "Ereignisbezogener Zusammenhang, Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome"
+    gekuerzt: "Das ist eine gekürzte Version des Symptoms"
+    comment: "Das ist ein Kommentar"
 
 kinderanwendung: true
 erwachsenenanwendung: true
