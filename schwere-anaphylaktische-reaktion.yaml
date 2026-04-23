@@ -86,9 +86,9 @@ kinder_aml2:
       kommentar: ""
       handelsnamen:
         - handelsname: "Adrenalin Pädia"
-          kommentar: ""
+          kommentar: "ASB Linz"
       kontraindikationen:
-        - kontraindikation: ["Allergie / Unverträglichkeit", "unter 15 kg KG / 3. LJ"]
+        - kontraindikation: ["Allergie / Unverträglichkeit"]
           kommentar: ""
       dosierungsgruppen:
         - gewichtsklasse: "unter 50 kg KG"

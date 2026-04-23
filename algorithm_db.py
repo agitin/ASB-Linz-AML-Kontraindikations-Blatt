@@ -238,17 +238,25 @@ class Algorithm:
         # Titel
         lines.append(f"# {self.algorithmus}\n")
         
-        # Symptome
+        # Symptome (nicht in Tabelle)
         if self.symptome:
             lines.append("## Symptome\n")
-            lines.append("| Symptom | Kommentar |")
-            lines.append("| -------- | ------- |")
             for symptom in self.symptome:
-                lines.append(f"| **Ganzer Text:** {symptom.ganzer_text} | {symptom.kommentar} |")
+                if symptom.ganzer_text:
+                    text = f"**Ganzer Text:** {symptom.ganzer_text}"
+                    if symptom.kommentar:
+                        text += f" *(Kommentar: {symptom.kommentar})*"
+                    lines.append(text)
                 if symptom.hervorgehoben:
-                    lines.append(f"| **Hervorgehoben:** {symptom.hervorgehoben} | {symptom.kommentar} |")
+                    text = f"\n **Hervorgehoben:** {symptom.hervorgehoben}"
+                    if symptom.kommentar:
+                        text += f" *(Kommentar: {symptom.kommentar})*"
+                    lines.append(text)
                 if symptom.gekuerzt:
-                    lines.append(f"| **Gekürzt:** {symptom.gekuerzt} | {symptom.kommentar} |")
+                    text = f"\n **Gekürzt:** {symptom.gekuerzt}"
+                    if symptom.kommentar:
+                        text += f" *(Kommentar: {symptom.kommentar})*"
+                    lines.append(text)
             lines.append("")
         
         # AML1
@@ -257,10 +265,11 @@ class Algorithm:
             
             # Kinderanwendung AML1
             if self.kinderanwendung and self.children:
-                lines.append("### Kinderanwendung\n")
-                lines.append("| Information | Kommentar |")
-                lines.append("| -------- | ------- |")
-                lines.append(f"| **Notarzt:** {self.children.notarzt} | {self.children.notarzt_kommentar} |")
+                lines.append("### Kinderanwendung (AML1)\n")
+                notarzt_text = f"**Notarzt:** {self.children.notarzt}"
+                if self.children.notarzt_kommentar:
+                    notarzt_text += f" *(Kommentar: {self.children.notarzt_kommentar})*"
+                lines.append(notarzt_text)
                 
                 if self.children.kontraindikationen and any(ci.text for ci in self.children.kontraindikationen):
                     kontra_items = []
@@ -275,17 +284,21 @@ class Algorithm:
                                 kontra_kommentar = ci.kommentar
                     if kontra_items:
                         kontra_str = ", ".join(kontra_items)
-                        lines.append(f"| **Kontraindikationen:** {kontra_str} | {kontra_kommentar} |")
+                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
+                        if kontra_kommentar:
+                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                        lines.append(kontra_text)
                 lines.append("")
                 
                 for wirkstoff in self.children.wirkstoffe:
                     lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
                     
                     if wirkstoff.handelsnamen:
-                        lines.append("| Handelsname | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for spec in wirkstoff.handelsnamen:
-                            lines.append(f"| {spec.name} | {spec.kommentar} |")
+                            text = f"Handelsname: {spec.name}"
+                            if spec.kommentar:
+                                text += f" *(Kommentar: {spec.kommentar})*"
+                            lines.append(text)
                         lines.append("")
                     
                     if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
@@ -300,9 +313,10 @@ class Algorithm:
                                 kontra_kommentar = ci.kommentar
                         if kontra_items:
                             kontra_str = ", ".join(kontra_items)
-                            lines.append("| Kontraindikationen | Kommentar |")
-                            lines.append("| -------- | ------- |")
-                            lines.append(f"| {kontra_str} | {kontra_kommentar} |")
+                            kontra_text = f"Kontraindikationen: {kontra_str}"
+                            if kontra_kommentar:
+                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                            lines.append(kontra_text)
                             lines.append("")
                     
                     if wirkstoff.dosierungsgruppen:
@@ -317,18 +331,20 @@ class Algorithm:
                         lines.append("")
                     
                     if wirkstoff.wiederholungen:
-                        lines.append("| Wiederholung | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for rep in wirkstoff.wiederholungen:
-                            lines.append(f"| {rep.text} | {rep.kommentar} |")
+                            text = f"Wiederholung: {rep.text}"
+                            if rep.kommentar:
+                                text += f" *(Kommentar: {rep.kommentar})*"
+                            lines.append(text)
                         lines.append("")
             
             # Erwachsenenanwendung AML1
             if self.erwachsenenanwendung and self.adults:
-                lines.append("### Erwachsenenanwendung\n")
-                lines.append("| Information | Kommentar |")
-                lines.append("| -------- | ------- |")
-                lines.append(f"| **Notarzt:** {self.adults.notarzt} | {self.adults.notarzt_kommentar} |")
+                lines.append("### Erwachsenenanwendung (AML1)\n")
+                notarzt_text = f"**Notarzt:** {self.adults.notarzt}"
+                if self.adults.notarzt_kommentar:
+                    notarzt_text += f" *(Kommentar: {self.adults.notarzt_kommentar})*"
+                lines.append(notarzt_text)
                 
                 if self.adults.kontraindikationen and any(ci.text for ci in self.adults.kontraindikationen):
                     kontra_items = []
@@ -342,17 +358,21 @@ class Algorithm:
                             kontra_kommentar = ci.kommentar
                     if kontra_items:
                         kontra_str = ", ".join(kontra_items)
-                        lines.append(f"| **Kontraindikationen:** {kontra_str} | {kontra_kommentar} |")
+                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
+                        if kontra_kommentar:
+                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                        lines.append(kontra_text)
                 lines.append("")
                 
                 for wirkstoff in self.adults.wirkstoffe:
                     lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
                     
                     if wirkstoff.handelsnamen:
-                        lines.append("| Handelsname | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for spec in wirkstoff.handelsnamen:
-                            lines.append(f"| {spec.name} | {spec.kommentar} |")
+                            text = f"Handelsname: {spec.name}"
+                            if spec.kommentar:
+                                text += f" *(Kommentar: {spec.kommentar})*"
+                            lines.append(text)
                         lines.append("")
                     
                     if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
@@ -367,9 +387,10 @@ class Algorithm:
                                 kontra_kommentar = ci.kommentar
                         if kontra_items:
                             kontra_str = ", ".join(kontra_items)
-                            lines.append("| Kontraindikationen | Kommentar |")
-                            lines.append("| -------- | ------- |")
-                            lines.append(f"| {kontra_str} | {kontra_kommentar} |")
+                            kontra_text = f"Kontraindikationen: {kontra_str}"
+                            if kontra_kommentar:
+                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                            lines.append(kontra_text)
                             lines.append("")
                     
                     if wirkstoff.dosierungsgruppen:
@@ -384,11 +405,12 @@ class Algorithm:
                         lines.append("")
                     
                     if wirkstoff.wiederholungen:
-                        lines.append("| Wiederholung | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for rep in wirkstoff.wiederholungen:
-                            lines.append(f"| {rep.text} | {rep.kommentar} |")
-                        lines.append("")
+                            text = f"Wiederholung: {rep.text}"
+                            if rep.kommentar:
+                                text += f" *(Kommentar: {rep.kommentar})*"
+                            lines.append(text)
+                            lines.append("")
         
         # AML2
         if self.kinderanwendung_aml2 or self.erwachsenenanwendung_aml2:
@@ -397,9 +419,10 @@ class Algorithm:
             # Kinderanwendung AML2
             if self.kinderanwendung_aml2 and self.children_aml2:
                 lines.append("### Kinderanwendung (AML2)\n")
-                lines.append("| Information | Kommentar |")
-                lines.append("| -------- | ------- |")
-                lines.append(f"| **Notarzt:** {self.children_aml2.notarzt} | {self.children_aml2.notarzt_kommentar} |")
+                notarzt_text = f"**Notarzt:** {self.children_aml2.notarzt}"
+                if self.children_aml2.notarzt_kommentar:
+                    notarzt_text += f" *(Kommentar: {self.children_aml2.notarzt_kommentar})*"
+                lines.append(notarzt_text)
                 
                 if self.children_aml2.kontraindikationen and any(ci.text for ci in self.children_aml2.kontraindikationen):
                     kontra_items = []
@@ -414,17 +437,21 @@ class Algorithm:
                                 kontra_kommentar = ci.kommentar
                     if kontra_items:
                         kontra_str = ", ".join(kontra_items)
-                        lines.append(f"| **Kontraindikationen:** {kontra_str} | {kontra_kommentar} |")
+                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
+                        if kontra_kommentar:
+                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                        lines.append(kontra_text)
                 lines.append("")
                 
                 for wirkstoff in self.children_aml2.wirkstoffe:
                     lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
                     
                     if wirkstoff.handelsnamen:
-                        lines.append("| Handelsname | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for spec in wirkstoff.handelsnamen:
-                            lines.append(f"| {spec.name} | {spec.kommentar} |")
+                            text = f"Handelsname: {spec.name}"
+                            if spec.kommentar:
+                                text += f" *(Kommentar: {spec.kommentar})*"
+                            lines.append(text)
                         lines.append("")
                     
                     if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
@@ -439,9 +466,10 @@ class Algorithm:
                                 kontra_kommentar = ci.kommentar
                         if kontra_items:
                             kontra_str = ", ".join(kontra_items)
-                            lines.append("| Kontraindikationen | Kommentar |")
-                            lines.append("| -------- | ------- |")
-                            lines.append(f"| {kontra_str} | {kontra_kommentar} |")
+                            kontra_text = f"Kontraindikationen: {kontra_str}"
+                            if kontra_kommentar:
+                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                            lines.append(kontra_text)
                             lines.append("")
                     
                     if wirkstoff.dosierungsgruppen:
@@ -456,18 +484,20 @@ class Algorithm:
                         lines.append("")
                     
                     if wirkstoff.wiederholungen:
-                        lines.append("| Wiederholung | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for rep in wirkstoff.wiederholungen:
-                            lines.append(f"| {rep.text} | {rep.kommentar} |")
+                            text = f"Wiederholung: {rep.text}"
+                            if rep.kommentar:
+                                text += f" *(Kommentar: {rep.kommentar})*"
+                            lines.append(text)
                         lines.append("")
             
             # Erwachsenenanwendung AML2
             if self.erwachsenenanwendung_aml2 and self.adults_aml2:
                 lines.append("### Erwachsenenanwendung (AML2)\n")
-                lines.append("| Information | Kommentar |")
-                lines.append("| -------- | ------- |")
-                lines.append(f"| **Notarzt:** {self.adults_aml2.notarzt} | {self.adults_aml2.notarzt_kommentar} |")
+                notarzt_text = f"**Notarzt:** {self.adults_aml2.notarzt}"
+                if self.adults_aml2.notarzt_kommentar:
+                    notarzt_text += f" *(Kommentar: {self.adults_aml2.notarzt_kommentar})*"
+                lines.append(notarzt_text)
                 
                 if self.adults_aml2.kontraindikationen and any(ci.text for ci in self.adults_aml2.kontraindikationen):
                     kontra_items = []
@@ -481,17 +511,21 @@ class Algorithm:
                             kontra_kommentar = ci.kommentar
                     if kontra_items:
                         kontra_str = ", ".join(kontra_items)
-                        lines.append(f"| **Kontraindikationen:** {kontra_str} | {kontra_kommentar} |")
+                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
+                        if kontra_kommentar:
+                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                        lines.append(kontra_text)
                 lines.append("")
                 
                 for wirkstoff in self.adults_aml2.wirkstoffe:
                     lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
                     
                     if wirkstoff.handelsnamen:
-                        lines.append("| Handelsname | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for spec in wirkstoff.handelsnamen:
-                            lines.append(f"| {spec.name} | {spec.kommentar} |")
+                            text = f"Handelsname: {spec.name}"
+                            if spec.kommentar:
+                                text += f" *(Kommentar: {spec.kommentar})*"
+                            lines.append(text)
                         lines.append("")
                     
                     if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
@@ -506,9 +540,10 @@ class Algorithm:
                                 kontra_kommentar = ci.kommentar
                         if kontra_items:
                             kontra_str = ", ".join(kontra_items)
-                            lines.append("| Kontraindikationen | Kommentar |")
-                            lines.append("| -------- | ------- |")
-                            lines.append(f"| {kontra_str} | {kontra_kommentar} |")
+                            kontra_text = f"Kontraindikationen: {kontra_str}"
+                            if kontra_kommentar:
+                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
+                            lines.append(kontra_text)
                             lines.append("")
                     
                     if wirkstoff.dosierungsgruppen:
@@ -523,10 +558,11 @@ class Algorithm:
                         lines.append("")
                     
                     if wirkstoff.wiederholungen:
-                        lines.append("| Wiederholung | Kommentar |")
-                        lines.append("| -------- | ------- |")
                         for rep in wirkstoff.wiederholungen:
-                            lines.append(f"| {rep.text} | {rep.kommentar} |")
+                            text = f"Wiederholung: {rep.text}"
+                            if rep.kommentar:
+                                text += f" *(Kommentar: {rep.kommentar})*"
+                            lines.append(text)
                         lines.append("")
         
         return "\n".join(lines)
