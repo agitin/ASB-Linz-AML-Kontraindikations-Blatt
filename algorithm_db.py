@@ -569,18 +569,28 @@ class Algorithm:
 
 
 if __name__ == "__main__":
-    # Lade den Algorithmus aus der YAML-Datei
-    yaml_file = Path("schwere-anaphylaktische-reaktion.yaml")
-    algorithm = Algorithm.from_yaml(yaml_file)
-    
-    # Exportiere als Markdown
-    markdown = algorithm.to_markdown()
-    
-    # Speichere die Markdown-Datei
+    # Export-Verzeichnis anlegen
     export_dir = Path("export")
     export_dir.mkdir(exist_ok=True)
-    
-    output_file = export_dir / "schwere-anaphylaktische-reaktion.md"
-    output_file.write_text(markdown, encoding="utf-8")
-    
-    print(f"✓ Markdown erfolgreich exportiert nach: {output_file}")
+
+    # Alle YAML-Dateien im aktuellen Verzeichnis finden
+    yaml_files = list(Path(".").glob("*.yaml"))
+
+    if not yaml_files:
+        print("Keine .yaml-Dateien gefunden.")
+    else:
+        for yaml_file in yaml_files:
+            try:
+                # Algorithmus laden
+                algorithm = Algorithm.from_yaml(yaml_file)
+
+                # Markdown erzeugen
+                markdown = algorithm.to_markdown()
+
+                # Zieldatei erstellen
+                output_file = export_dir / f"{yaml_file.stem}.md"
+                output_file.write_text(markdown, encoding="utf-8")
+
+                print(f"✓ Exportiert: {yaml_file.name} -> {output_file}")
+            except Exception as e:
+                print(f"✗ Fehler bei {yaml_file.name}: {e}")
