@@ -1,0 +1,89 @@
+algorithmus: "Akuter Bronchospasmus"
+kommentar: ""
+
+symptome:
+  - ganzer_text: "Akute Atemnot, erhöhte Atemfrequenz, Atemgeräusche: Giemen, Brummen, Pfeifen, verlängertes Exspirium"
+    hervorgehoben: "Atemnot, erhöhte Atemfrequenz, Giemen, Brummen, Pfeifen, verlängertes Exspirium"
+    gekuerzt: "Das ist eine gekürzte Version der Symptome"
+    kommentar: ""
+
+# AML1 und AML2 Anwendungsschalter
+kinderanwendung_aml1: false
+erwachsenenanwendung_aml1: true
+kinderanwendung_aml2: false
+erwachsenenanwendung_aml2: true
+
+# AML1 Anwendungen
+erwachsene_aml1:
+  notarzt: "verständigen"
+  notarzt_kommentar: ""
+  
+  kontraindikationen: []
+  
+  wirkstoffe:
+    - name: "Salbutamol/Ipratropium"
+      kommentar: ""
+      handelsnamen:
+        - handelsname: "Combivent"
+          kommentar: ""
+      kontraindikationen:
+        - kontraindikation: ["Allergie / Unverträglichkeit", "< 18. LJ", "HF > 140/min", "Salb./Ipratr. bereits in den letzten 4h eingenommen"]
+          kommentar: ""
+      dosierungsgruppen:
+        - gewichtsklasse: "keine"
+          gewichtsklasse_kommentar: ""
+          dosierung: "2,5 ml"
+          dosierung_kommentar: ""
+          applikation: "inhalativ via O2-Verneblermaske"
+          applikation_kommentar: ""
+      wiederholungen:
+        - wiederholung: "keine"
+          kommentar: ""
+
+
+# AML2 Anwendungen
+erwachsene_aml2:
+  notarzt: "verständigen"
+  notarzt_kommentar: ""
+  
+  kontraindikationen: []
+  
+  wirkstoffe:
+    - name: "1. Salbutamol/Ipratropium"
+      kommentar: ""
+      handelsnamen:
+        - handelsname: "Combivent"
+          kommentar: ""
+      kontraindikationen:
+        - kontraindikation: ["Allergie / Unverträglichkeit", "< 18. LJ", "HF > 140/min", "Salb./Ipratr. bereits in den letzten 4h eingenommen"]
+          kommentar: ""
+      dosierungsgruppen:
+        - gewichtsklasse: "keine"
+          gewichtsklasse_kommentar: ""
+          dosierung: "2,5 ml"
+          dosierung_kommentar: ""
+          applikation: "inhalativ via O2-Verneblermaske"
+          applikation_kommentar: ""
+      wiederholungen:
+        - wiederholung: "keine"
+          kommentar: ""
+    - name: "2. Prednisolon"
+      kommentar: ""
+      handelsnamen:
+        - handelsname: "Prednisolut, Solu-Dacortin"
+          kommentar: ""
+      kontraindikationen:
+        - kontraindikation: ["Allergie / Unverträglichkeit"]
+          kommentar: ""
+      dosierungsgruppen:
+        - gewichtsklasse: "keine"
+          gewichtsklasse_kommentar: ""
+          dosierung: "50 mg"
+          dosierung_kommentar: ""
+          applikation: "i.v."
+          applikation_kommentar: ""
+      wiederholungen:
+        - wiederholung: "keine"
+          kommentar: ""
+
+
