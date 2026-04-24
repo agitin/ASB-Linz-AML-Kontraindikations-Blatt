@@ -36,30 +36,26 @@ class Specialty:
 class DosageGroup:
     """Dosierungsgruppe mit Gewichts-/Altersklasse und Dosierung"""
     gewichtsklasse: str = ""
-    gewichtsklasse_kommentar: str = ""
     dosierung: str = ""
-    dosierung_kommentar: str = ""
     applikation: str = ""
-    applikation_kommentar: str = ""
 
 
 @dataclass
 class ActiveSubstance:
-    """Wirkstoff mit Spezialitäten, Kontraindikationen, Dosierungen und Wiederholungen"""
+    """Wirkstoff mit Handelsname, Kontraindikationen und Dosierungen"""
     name: str
-    kommentar: str = ""
-    handelsnamen: List[Specialty] = field(default_factory=list)
-    kontraindikationen: List[PropertyWithComment] = field(default_factory=list)
+    handelsname: str = ""
+    kontraindikationen: List[str] = field(default_factory=list)
     dosierungsgruppen: List[DosageGroup] = field(default_factory=list)
-    wiederholungen: List[PropertyWithComment] = field(default_factory=list)
 
 
 @dataclass
 class PatientGroup:
     """Patient-Gruppe (Kinder oder Erwachsene) mit allen Informationen"""
+    kommentar: str = ""
     notarzt: str = ""
     notarzt_kommentar: str = ""
-    kontraindikationen: List[PropertyWithComment] = field(default_factory=list)
+    kontraindikationen: List[str] = field(default_factory=list)
     wirkstoffe: List[ActiveSubstance] = field(default_factory=list)
 
 
@@ -139,92 +135,66 @@ class Algorithm:
 
     @staticmethod
     def _parse_patient_group(group_data: dict) -> PatientGroup:
+        # Parse Kontraindikationen (einfache String-Liste)
         kontraindikationen = []
         for ci_key in ['kontraindikationen', 'contraindications']:
             if ci_key in group_data and group_data[ci_key]:
-                for ci in group_data[ci_key]:
-                    if isinstance(ci, dict):
-                        text = ci.get('kontraindikation') or ci.get('contraindication') or ci.get('text', '')
-                        kontraindikationen.append(PropertyWithComment(
-                            text=text,
-                            kommentar=ci.get('kommentar', '') or ci.get('comment', '')
-                        ))
-                    else:
-                        kontraindikationen.append(PropertyWithComment(text=ci))
+                kontraindikationen = group_data[ci_key]
                 break
 
+        # Parse Wirkstoffe
         wirkstoffe = []
         for substance_key in ['wirkstoffe', 'active_substances']:
             if substance_key in group_data and group_data[substance_key]:
                 for substance_data in group_data[substance_key]:
+                    # Handelsname (einzelner String oder Liste)
+                    handelsname = ""
+                    if substance_data.get('handelsname'):
+                        handelsname = substance_data.get('handelsname')
+                    elif substance_data.get('handelsnamen'):
+                        handelsnamen_list = substance_data.get('handelsnamen', [])
+                        if handelsnamen_list and isinstance(handelsnamen_list[0], dict):
+                            handelsname = handelsnamen_list[0].get('handelsname', '')
+                        elif handelsnamen_list:
+                            handelsname = handelsnamen_list[0]
 
-                    handelsnamen = []
-                    for spec_list in [substance_data.get('handelsnamen', []), substance_data.get('specialties', [])]:
-                        for spec in spec_list:
-                            if isinstance(spec, dict):
-                                name = spec.get('handelsname') or spec.get('specialty') or spec.get('name', '')
-                                handelsnamen.append(Specialty(
-                                    name=name,
-                                    kommentar=spec.get('kommentar', '') or spec.get('comment', '')
-                                ))
-                            else:
-                                handelsnamen.append(Specialty(name=spec))
-                        if spec_list:
-                            break
-
+                    # Kontraindikationen des Wirkstoffs (String-Liste)
                     subst_kontraindikationen = []
                     for ci_list in [substance_data.get('kontraindikationen', []), substance_data.get('contraindications', [])]:
-                        for ci in ci_list:
-                            if isinstance(ci, dict):
-                                text = ci.get('kontraindikation') or ci.get('contraindication') or ci.get('text', '')
-                                subst_kontraindikationen.append(PropertyWithComment(
-                                    text=text,
-                                    kommentar=ci.get('kommentar', '') or ci.get('comment', '')
-                                ))
-                            else:
-                                subst_kontraindikationen.append(PropertyWithComment(text=ci))
                         if ci_list:
+                            if isinstance(ci_list[0], dict) and 'kontraindikation' in ci_list[0]:
+                                for ci in ci_list:
+                                    text = ci.get('kontraindikation')
+                                    if isinstance(text, list):
+                                        subst_kontraindikationen.extend(text)
+                                    else:
+                                        subst_kontraindikationen.append(text)
+                            else:
+                                subst_kontraindikationen = ci_list
                             break
 
+                    # Parse Dosierungsgruppen
                     dosierungsgruppen = []
                     for dg_list in [substance_data.get('dosierungsgruppen', []), substance_data.get('dosage_groups', [])]:
                         for dg in dg_list:
                             dosierungsgruppen.append(DosageGroup(
                                 gewichtsklasse=dg.get('gewichtsklasse') or dg.get('weight_class', ''),
-                                gewichtsklasse_kommentar=dg.get('gewichtsklasse_kommentar') or dg.get('gewichtsklasse_comment') or dg.get('weight_class_kommentar') or dg.get('weight_class_comment', ''),
                                 dosierung=dg.get('dosierung') or dg.get('dosage', ''),
-                                dosierung_kommentar=dg.get('dosierung_kommentar') or dg.get('dosierung_comment') or dg.get('dosage_kommentar') or dg.get('dosage_comment', ''),
-                                applikation=dg.get('applikation') or dg.get('route', ''),
-                                applikation_kommentar=dg.get('applikation_kommentar') or dg.get('applikation_comment') or dg.get('route_kommentar') or dg.get('route_comment', '')
+                                applikation=dg.get('applikation') or dg.get('route', '')
                             ))
                         if dg_list:
                             break
 
-                    wiederholungen = []
-                    for rep_list in [substance_data.get('wiederholungen', []), substance_data.get('repetitions', [])]:
-                        for rep in rep_list:
-                            if isinstance(rep, dict):
-                                text = rep.get('wiederholung') or rep.get('repetition') or rep.get('text', '')
-                                wiederholungen.append(PropertyWithComment(
-                                    text=text,
-                                    kommentar=rep.get('kommentar', '') or rep.get('comment', '')
-                                ))
-                            else:
-                                wiederholungen.append(PropertyWithComment(text=rep))
-                        if rep_list:
-                            break
-
                     wirkstoffe.append(ActiveSubstance(
                         name=substance_data.get('name', ''),
-                        kommentar=substance_data.get('kommentar', '') or substance_data.get('comment', ''),
-                        handelsnamen=handelsnamen,
+                        handelsname=handelsname,
                         kontraindikationen=subst_kontraindikationen,
-                        dosierungsgruppen=dosierungsgruppen,
-                        wiederholungen=wiederholungen
+                        dosierungsgruppen=dosierungsgruppen
                     ))
                 break
 
         return PatientGroup(
+            kommentar=group_data.get('kommentar', ''),
             notarzt=group_data.get('notarzt', '') or group_data.get('physician_contact', ''),
             notarzt_kommentar=group_data.get('notarzt_kommentar', '') or group_data.get('notarzt_comment', '') or group_data.get('physician_contact_kommentar', '') or group_data.get('physician_contact_comment', ''),
             kontraindikationen=kontraindikationen,
@@ -232,338 +202,89 @@ class Algorithm:
         )
 
     def to_markdown(self) -> str:
-        """Exportiert den Algorithmus als hierarchische Markdown mit Überschriften"""
+        """Exportiert den Algorithmus als Markdown"""
         lines = []
         
         # Titel
         lines.append(f"# {self.algorithmus}\n")
         
-        # Symptome (nicht in Tabelle)
+        # Symptome
         if self.symptome:
             lines.append("## Symptome\n")
             for symptom in self.symptome:
                 if symptom.ganzer_text:
-                    text = f"**Ganzer Text:** {symptom.ganzer_text}"
-                    if symptom.kommentar:
-                        text += f" *(Kommentar: {symptom.kommentar})*"
-                    lines.append(text)
-                if symptom.hervorgehoben:
-                    text = f"\n **Hervorgehoben:** {symptom.hervorgehoben}"
-                    if symptom.kommentar:
-                        text += f" *(Kommentar: {symptom.kommentar})*"
-                    lines.append(text)
-                if symptom.gekuerzt:
-                    text = f"\n **Gekürzt:** {symptom.gekuerzt}"
-                    if symptom.kommentar:
-                        text += f" *(Kommentar: {symptom.kommentar})*"
-                    lines.append(text)
+                    lines.append(f"{symptom.ganzer_text}")
             lines.append("")
+        
+        # Helper-Funktion für Patient-Gruppen
+        def render_patient_group(group, title):
+            if not group:
+                return
+            
+            lines.append(f"### {title}\n")
+            
+            # Notarzt
+            if group.notarzt:
+                notarzt_text = f"**Notarzt:** {group.notarzt}"
+                if group.notarzt_kommentar:
+                    notarzt_text += f" *(Kommentar: {group.notarzt_kommentar})*"
+                lines.append(notarzt_text)
+            
+            # Block-Kommentar
+            if group.kommentar:
+                lines.append(f"*(Kommentar: {group.kommentar})*")
+            
+            # Kontraindikationen (Block-Ebene)
+            if group.kontraindikationen:
+                kontra_str = ", ".join(filter(None, group.kontraindikationen))
+                if kontra_str and kontra_str != "":
+                    lines.append(f"**Kontraindikationen:** {kontra_str}")
+            
+            lines.append("")
+            
+            # Wirkstoffe
+            for i, wirkstoff in enumerate(group.wirkstoffe, 1):
+                # Wirkstoff und Handelsname auf einer Zeile
+                wirkstoff_text = f"**{i}. {wirkstoff.name}**"
+                if wirkstoff.handelsname:
+                    wirkstoff_text += f", Handelsname: {wirkstoff.handelsname}"
+                lines.append(wirkstoff_text)
+                lines.append("")
+                
+                # Kontraindikationen des Wirkstoffs
+                if wirkstoff.kontraindikationen:
+                    kontra_str = ", ".join(filter(None, wirkstoff.kontraindikationen))
+                    if kontra_str:
+                        lines.append(f"Kontraindikationen: {kontra_str}")
+                        lines.append("")
+                
+                # Dosierungsgruppen (Tabelle ohne Kommentarspalte)
+                if wirkstoff.dosierungsgruppen:
+                    lines.append("| Gewichts-/Altersklasse | Dosierung | Applikation |")
+                    lines.append("| -------- | ------- | ------- |")
+                    for dg in wirkstoff.dosierungsgruppen:
+                        gewicht = dg.gewichtsklasse or "keine"
+                        dosierung = dg.dosierung or ""
+                        applikation = dg.applikation or ""
+                        lines.append(f"| {gewicht} | {dosierung} | {applikation} |")
+                    lines.append("")
         
         # AML1
         if self.kinderanwendung or self.erwachsenenanwendung:
             lines.append("## AML1\n")
-            
-            # Kinderanwendung AML1
             if self.kinderanwendung and self.children:
-                lines.append("### Kinderanwendung (AML1)\n")
-                notarzt_text = f"**Notarzt:** {self.children.notarzt}"
-                if self.children.notarzt_kommentar:
-                    notarzt_text += f" *(Kommentar: {self.children.notarzt_kommentar})*"
-                lines.append(notarzt_text)
-                
-                if self.children.kontraindikationen and any(ci.text for ci in self.children.kontraindikationen):
-                    kontra_items = []
-                    kontra_kommentar = ""
-                    for ci in self.children.kontraindikationen:
-                        if ci.text:
-                            if isinstance(ci.text, list):
-                                kontra_items.extend(ci.text)
-                            else:
-                                kontra_items.append(ci.text)
-                            if ci.kommentar:
-                                kontra_kommentar = ci.kommentar
-                    if kontra_items:
-                        kontra_str = ", ".join(kontra_items)
-                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
-                        if kontra_kommentar:
-                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                        lines.append(kontra_text)
-                lines.append("")
-                
-                for wirkstoff in self.children.wirkstoffe:
-                    lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
-                    
-                    if wirkstoff.handelsnamen:
-                        for spec in wirkstoff.handelsnamen:
-                            text = f"Handelsname: {spec.name}"
-                            if spec.kommentar:
-                                text += f" *(Kommentar: {spec.kommentar})*"
-                            lines.append(text)
-                        lines.append("")
-                    
-                    if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
-                        kontra_items = []
-                        kontra_kommentar = ""
-                        for ci in wirkstoff.kontraindikationen:
-                            if isinstance(ci.text, list):
-                                kontra_items.extend(ci.text)
-                            elif ci.text:
-                                kontra_items.append(ci.text)
-                            if ci.kommentar:
-                                kontra_kommentar = ci.kommentar
-                        if kontra_items:
-                            kontra_str = ", ".join(kontra_items)
-                            kontra_text = f"Kontraindikationen: {kontra_str}"
-                            if kontra_kommentar:
-                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                            lines.append(kontra_text)
-                            lines.append("")
-                    
-                    if wirkstoff.dosierungsgruppen:
-                        lines.append("| Gewichts-/Altersklasse | Dosierung | Applikation | Kommentar |")
-                        lines.append("| -------- | ------- | ------- | ------- |")
-                        for dg in wirkstoff.dosierungsgruppen:
-                            gewicht = dg.gewichtsklasse or "keine"
-                            dosierung = dg.dosierung or ""
-                            applikation = dg.applikation or ""
-                            kommentar = dg.gewichtsklasse_kommentar or dg.dosierung_kommentar or dg.applikation_kommentar or ""
-                            lines.append(f"| {gewicht} | {dosierung} | {applikation} | {kommentar} |")
-                        lines.append("")
-                    
-                    if wirkstoff.wiederholungen:
-                        for rep in wirkstoff.wiederholungen:
-                            text = f"Wiederholung: {rep.text}"
-                            if rep.kommentar:
-                                text += f" *(Kommentar: {rep.kommentar})*"
-                            lines.append(text)
-                        lines.append("")
-            
-            # Erwachsenenanwendung AML1
+                render_patient_group(self.children, "Kinderanwendung (AML1)")
             if self.erwachsenenanwendung and self.adults:
-                lines.append("### Erwachsenenanwendung (AML1)\n")
-                notarzt_text = f"**Notarzt:** {self.adults.notarzt}"
-                if self.adults.notarzt_kommentar:
-                    notarzt_text += f" *(Kommentar: {self.adults.notarzt_kommentar})*"
-                lines.append(notarzt_text)
-                
-                if self.adults.kontraindikationen and any(ci.text for ci in self.adults.kontraindikationen):
-                    kontra_items = []
-                    kontra_kommentar = ""
-                    for ci in self.adults.kontraindikationen:
-                        if isinstance(ci.text, list):
-                            kontra_items.extend(ci.text)
-                        elif ci.text:
-                            kontra_items.append(ci.text)
-                        if ci.kommentar:
-                            kontra_kommentar = ci.kommentar
-                    if kontra_items:
-                        kontra_str = ", ".join(kontra_items)
-                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
-                        if kontra_kommentar:
-                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                        lines.append(kontra_text)
-                lines.append("")
-                
-                for wirkstoff in self.adults.wirkstoffe:
-                    lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
-                    
-                    if wirkstoff.handelsnamen:
-                        for spec in wirkstoff.handelsnamen:
-                            text = f"Handelsname: {spec.name}"
-                            if spec.kommentar:
-                                text += f" *(Kommentar: {spec.kommentar})*"
-                            lines.append(text)
-                        lines.append("")
-                    
-                    if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
-                        kontra_items = []
-                        kontra_kommentar = ""
-                        for ci in wirkstoff.kontraindikationen:
-                            if isinstance(ci.text, list):
-                                kontra_items.extend(ci.text)
-                            elif ci.text:
-                                kontra_items.append(ci.text)
-                            if ci.kommentar:
-                                kontra_kommentar = ci.kommentar
-                        if kontra_items:
-                            kontra_str = ", ".join(kontra_items)
-                            kontra_text = f"Kontraindikationen: {kontra_str}"
-                            if kontra_kommentar:
-                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                            lines.append(kontra_text)
-                            lines.append("")
-                    
-                    if wirkstoff.dosierungsgruppen:
-                        lines.append("| Gewichts-/Altersklasse | Dosierung | Applikation | Kommentar |")
-                        lines.append("| -------- | ------- | ------- | ------- |")
-                        for dg in wirkstoff.dosierungsgruppen:
-                            gewicht = dg.gewichtsklasse or "keine"
-                            dosierung = dg.dosierung or ""
-                            applikation = dg.applikation or ""
-                            kommentar = dg.gewichtsklasse_kommentar or dg.dosierung_kommentar or dg.applikation_kommentar or ""
-                            lines.append(f"| {gewicht} | {dosierung} | {applikation} | {kommentar} |")
-                        lines.append("")
-                    
-                    if wirkstoff.wiederholungen:
-                        for rep in wirkstoff.wiederholungen:
-                            text = f"Wiederholung: {rep.text}"
-                            if rep.kommentar:
-                                text += f" *(Kommentar: {rep.kommentar})*"
-                            lines.append(text)
-                            lines.append("")
+                render_patient_group(self.adults, "Erwachsenenanwendung (AML1)")
         
         # AML2
         if self.kinderanwendung_aml2 or self.erwachsenenanwendung_aml2:
             lines.append("## AML2\n")
-            
-            # Kinderanwendung AML2
             if self.kinderanwendung_aml2 and self.children_aml2:
-                lines.append("### Kinderanwendung (AML2)\n")
-                notarzt_text = f"**Notarzt:** {self.children_aml2.notarzt}"
-                if self.children_aml2.notarzt_kommentar:
-                    notarzt_text += f" *(Kommentar: {self.children_aml2.notarzt_kommentar})*"
-                lines.append(notarzt_text)
-                
-                if self.children_aml2.kontraindikationen and any(ci.text for ci in self.children_aml2.kontraindikationen):
-                    kontra_items = []
-                    kontra_kommentar = ""
-                    for ci in self.children_aml2.kontraindikationen:
-                        if ci.text:
-                            if isinstance(ci.text, list):
-                                kontra_items.extend(ci.text)
-                            else:
-                                kontra_items.append(ci.text)
-                            if ci.kommentar:
-                                kontra_kommentar = ci.kommentar
-                    if kontra_items:
-                        kontra_str = ", ".join(kontra_items)
-                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
-                        if kontra_kommentar:
-                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                        lines.append(kontra_text)
-                lines.append("")
-                
-                for wirkstoff in self.children_aml2.wirkstoffe:
-                    lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
-                    
-                    if wirkstoff.handelsnamen:
-                        for spec in wirkstoff.handelsnamen:
-                            text = f"Handelsname: {spec.name}"
-                            if spec.kommentar:
-                                text += f" *(Kommentar: {spec.kommentar})*"
-                            lines.append(text)
-                        lines.append("")
-                    
-                    if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
-                        kontra_items = []
-                        kontra_kommentar = ""
-                        for ci in wirkstoff.kontraindikationen:
-                            if isinstance(ci.text, list):
-                                kontra_items.extend(ci.text)
-                            elif ci.text:
-                                kontra_items.append(ci.text)
-                            if ci.kommentar:
-                                kontra_kommentar = ci.kommentar
-                        if kontra_items:
-                            kontra_str = ", ".join(kontra_items)
-                            kontra_text = f"Kontraindikationen: {kontra_str}"
-                            if kontra_kommentar:
-                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                            lines.append(kontra_text)
-                            lines.append("")
-                    
-                    if wirkstoff.dosierungsgruppen:
-                        lines.append("| Gewichts-/Altersklasse | Dosierung | Applikation | Kommentar |")
-                        lines.append("| -------- | ------- | ------- | ------- |")
-                        for dg in wirkstoff.dosierungsgruppen:
-                            gewicht = dg.gewichtsklasse or "keine"
-                            dosierung = dg.dosierung or ""
-                            applikation = dg.applikation or ""
-                            kommentar = dg.gewichtsklasse_kommentar or dg.dosierung_kommentar or dg.applikation_kommentar or ""
-                            lines.append(f"| {gewicht} | {dosierung} | {applikation} | {kommentar} |")
-                        lines.append("")
-                    
-                    if wirkstoff.wiederholungen:
-                        for rep in wirkstoff.wiederholungen:
-                            text = f"Wiederholung: {rep.text}"
-                            if rep.kommentar:
-                                text += f" *(Kommentar: {rep.kommentar})*"
-                            lines.append(text)
-                        lines.append("")
-            
-            # Erwachsenenanwendung AML2
+                render_patient_group(self.children_aml2, "Kinderanwendung (AML2)")
             if self.erwachsenenanwendung_aml2 and self.adults_aml2:
-                lines.append("### Erwachsenenanwendung (AML2)\n")
-                notarzt_text = f"**Notarzt:** {self.adults_aml2.notarzt}"
-                if self.adults_aml2.notarzt_kommentar:
-                    notarzt_text += f" *(Kommentar: {self.adults_aml2.notarzt_kommentar})*"
-                lines.append(notarzt_text)
-                
-                if self.adults_aml2.kontraindikationen and any(ci.text for ci in self.adults_aml2.kontraindikationen):
-                    kontra_items = []
-                    kontra_kommentar = ""
-                    for ci in self.adults_aml2.kontraindikationen:
-                        if isinstance(ci.text, list):
-                            kontra_items.extend(ci.text)
-                        elif ci.text:
-                            kontra_items.append(ci.text)
-                        if ci.kommentar:
-                            kontra_kommentar = ci.kommentar
-                    if kontra_items:
-                        kontra_str = ", ".join(kontra_items)
-                        kontra_text = f"**Kontraindikationen:** {kontra_str}"
-                        if kontra_kommentar:
-                            kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                        lines.append(kontra_text)
-                lines.append("")
-                
-                for wirkstoff in self.adults_aml2.wirkstoffe:
-                    lines.append(f"#### Wirkstoff: {wirkstoff.name}\n")
-                    
-                    if wirkstoff.handelsnamen:
-                        for spec in wirkstoff.handelsnamen:
-                            text = f"Handelsname: {spec.name}"
-                            if spec.kommentar:
-                                text += f" *(Kommentar: {spec.kommentar})*"
-                            lines.append(text)
-                        lines.append("")
-                    
-                    if wirkstoff.kontraindikationen and any(ci.text for ci in wirkstoff.kontraindikationen):
-                        kontra_items = []
-                        kontra_kommentar = ""
-                        for ci in wirkstoff.kontraindikationen:
-                            if isinstance(ci.text, list):
-                                kontra_items.extend(ci.text)
-                            elif ci.text:
-                                kontra_items.append(ci.text)
-                            if ci.kommentar:
-                                kontra_kommentar = ci.kommentar
-                        if kontra_items:
-                            kontra_str = ", ".join(kontra_items)
-                            kontra_text = f"Kontraindikationen: {kontra_str}"
-                            if kontra_kommentar:
-                                kontra_text += f" *(Kommentar: {kontra_kommentar})*"
-                            lines.append(kontra_text)
-                            lines.append("")
-                    
-                    if wirkstoff.dosierungsgruppen:
-                        lines.append("| Gewichts-/Altersklasse | Dosierung | Applikation | Kommentar |")
-                        lines.append("| -------- | ------- | ------- | ------- |")
-                        for dg in wirkstoff.dosierungsgruppen:
-                            gewicht = dg.gewichtsklasse or "keine"
-                            dosierung = dg.dosierung or ""
-                            applikation = dg.applikation or ""
-                            kommentar = dg.gewichtsklasse_kommentar or dg.dosierung_kommentar or dg.applikation_kommentar or ""
-                            lines.append(f"| {gewicht} | {dosierung} | {applikation} | {kommentar} |")
-                        lines.append("")
-                    
-                    if wirkstoff.wiederholungen:
-                        for rep in wirkstoff.wiederholungen:
-                            text = f"Wiederholung: {rep.text}"
-                            if rep.kommentar:
-                                text += f" *(Kommentar: {rep.kommentar})*"
-                            lines.append(text)
-                        lines.append("")
+                render_patient_group(self.adults_aml2, "Erwachsenenanwendung (AML2)")
+        
         
         return "\n".join(lines)
 

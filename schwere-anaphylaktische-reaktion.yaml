@@ -3,9 +3,6 @@ kommentar: ""
 
 symptome:
   - ganzer_text: "Ereignisbezogener Zusammenhang (Insektenstich, Medikamente, Nahrungsmittel, etc.) Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome eventuell Hautsymptome"
-    hervorgehoben: "Ereignisbezogener Zusammenhang, Schwere Atemnot, Stridor, Bronchospasmus oder Schocksymptome"
-    gekuerzt: "Das ist eine gekürzte Version der Symptome"
-    kommentar: "Das ist ein Kommentar"
 
 # AML1 und AML2 Anwendungsschalter
 kinderanwendung_aml1: true
@@ -15,158 +12,95 @@ erwachsenenanwendung_aml2: true
 
 # AML1 Anwendungen
 kinder_aml1:
+  kommentar: ""
   notarzt: "alarmieren"
-  notarzt_kommentar: "ASB Linz"
-  
-  kontraindikationen:
-    - kontraindikation: ""
-      kommentar: ""
+  notarzt_kommentar: ""
+  kontraindikationen: []
   
   wirkstoffe:
     - name: "Epinephrin"
-      kommentar: ""
-      handelsnamen:
-        - handelsname: "EpiPen Junior"
-          kommentar: ""
+      handelsname: "EpiPen Junior"
       kontraindikationen:
-        - kontraindikation: ["Allergie / Unverträglichkeit", "unter 15 kg KG / 3. LJ"]
-          kommentar: ""
+        - "Allergie / Unverträglichkeit"
+        - "unter 15 kg KG / 3. LJ"
       dosierungsgruppen:
         - gewichtsklasse: "15–30 kg KG / 3.–12. LJ"
-          gewichtsklasse_kommentar: ""
           dosierung: "150 µg"
-          dosierung_kommentar: ""
           applikation: "i.m. Autoinjektor"
-          applikation_kommentar: ""
         - gewichtsklasse: "über 30 kg KG / über 12. LJ"
-          gewichtsklasse_kommentar: ""
           dosierung: "300 µg"
-          dosierung_kommentar: ""
           applikation: "i.m. Autoinjektor"
-          applikation_kommentar: ""
-      wiederholungen:
-        - wiederholung: "Einmalige Wiederholung nach 5 min, wenn keine Verbesserung"
-          kommentar: ""
 
 
 erwachsene_aml1:
+  kommentar: ""
   notarzt: "alarmieren"
-  notarzt_kommentar: "ASB Linz"
-  
-  kontraindikationen: [""]
+  notarzt_kommentar: ""
+  kontraindikationen: []
   
   wirkstoffe:
     - name: "Epinephrin"
-      kommentar: ""
-      handelsnamen:
-        - handelsname: "EpiPen"
-          kommentar: ""
-      kontraindikationen: ["Allergie / Unverträglichkeit"]
+      handelsname: "EpiPen"
+      kontraindikationen:
+        - "Allergie / Unverträglichkeit"
       dosierungsgruppen:
         - gewichtsklasse: "keine"
-          gewichtsklasse_kommentar: ""
           dosierung: "300 µg"
-          dosierung_kommentar: ""
           applikation: "i.m. Autoinjektor"
-          applikation_kommentar: ""
-      wiederholungen:
-        - wiederholung: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
-          kommentar: ""
 
 
 # AML2 Anwendungen
 kinder_aml2:
+  kommentar: ""
   notarzt: "alarmieren"
-  notarzt_kommentar: "ASB Linz"
-  
+  notarzt_kommentar: ""
   kontraindikationen: []
   
   wirkstoffe:
-    - name: "1. Epinephrin"
-      kommentar: ""
-      handelsnamen:
-        - handelsname: "Adrenalin Pädia"
-          kommentar: "ASB Linz"
+    - name: "Epinephrin"
+      handelsname: "Adrenalin Pädia"
       kontraindikationen:
-        - kontraindikation: ["Allergie / Unverträglichkeit"]
-          kommentar: ""
+        - "Allergie / Unverträglichkeit"
       dosierungsgruppen:
         - gewichtsklasse: "unter 50 kg KG"
-          gewichtsklasse_kommentar: ""
           dosierung: "10 µg / kg KG (=0,05 ml / kg KG)"
-          dosierung_kommentar: ""
           applikation: "i.m."
-          applikation_kommentar: "nur wenn kein Autoinjektor verfügbar"
         - gewichtsklasse: "über 50 kg KG"
-          gewichtsklasse_kommentar: ""
           dosierung: "500 µg (0,5 ml)"
-          dosierung_kommentar: ""
           applikation: "i.m."
-          applikation_kommentar: "nur wenn kein Autoinjektor verfügbar"
-      wiederholungen:
-        - wiederholung: "Einmalige Wiederholung nach 5 min, wenn keine Verbesserung"
-          kommentar: ""
-    - name: "2. Elektrolytlösung"
-      kommentar: "vereinfacht für \"isotone, kristalloide Elektrolytlösung\""
-      handelsnamen:
-        - handelsname: "Elo-Mel isoton"
-          kommentar: ""
+    
+    - name: "Elektrolytlösung"
+      handelsname: "Elo-Mel isoton"
       kontraindikationen:
-        - kontraindikation: ["Allergie / Unverträglichkeit", "unter 6. LJ"]
-          kommentar: ""
+        - "Allergie / Unverträglichkeit"
+        - "unter 6. LJ"
       dosierungsgruppen:
         - gewichtsklasse: "keine"
-          gewichtsklasse_kommentar: ""
           dosierung: "10 ml/kg KG (max. 500 ml)"
-          dosierung_kommentar: ""
           applikation: "i.v."
-          applikation_kommentar: ""
-      wiederholungen:
-        - wiederholung: "Einmalige Wiederholung, wenn keine Verbesserung"
-          kommentar: ""
+
 
 erwachsene_aml2:
+  kommentar: ""
   notarzt: "alarmieren"
-  notarzt_kommentar: "ASB Linz"
-  
+  notarzt_kommentar: ""
   kontraindikationen: []
   
   wirkstoffe:
-    - name: "1. Epinephrin"
-      kommentar: ""
-      handelsnamen:
-        - handelsname: "Adrenalin Pädia"
-          kommentar: ""
+    - name: "Epinephrin"
+      handelsname: "Adrenalin Pädia"
       kontraindikationen:
-        - kontraindikation: ["Allergie / Unverträglichkeit"]
-          kommentar: ""
+        - "Allergie / Unverträglichkeit"
       dosierungsgruppen:
         - gewichtsklasse: "keine"
-          gewichtsklasse_kommentar: ""
           dosierung: "500 µg"
-          dosierung_kommentar: ""
           applikation: "i.m."
-          applikation_kommentar: "nur wenn kein Autoinjektor verfügbar"
-      wiederholungen:
-        - wiederholung: "Einmalige Wiederholung nach 5 min wenn keine Verbesserung"
-          kommentar: ""
-    - name: "2. Elektrolytlösung"
-      kommentar: "vereinfacht für \"isotone, kristalloide Elektrolytlösung\""
-      handelsnamen:
-        - handelsname: "Elo-Mel isoton"
-          kommentar: ""
+    
+    - name: "Elektrolytlösung"
+      handelsname: "Elo-Mel isoton"
       kontraindikationen:
-        - kontraindikation: ["Allergie / Unverträglichkeit"]
-          kommentar: ""
+        - "Allergie / Unverträglichkeit"
       dosierungsgruppen:
         - gewichtsklasse: "keine"
-          gewichtsklasse_kommentar: ""
           dosierung: "500 ml"
-          dosierung_kommentar: ""
           applikation: "i.v."
-          applikation_kommentar: ""
-      wiederholungen:
-        - wiederholung: "Einmalige Wiederholung, wenn keine Verbesserung"
-          kommentar: ""
-
-
